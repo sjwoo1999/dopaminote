@@ -1,5 +1,5 @@
 /**
- * Dopaminote 앱의 타입 정의
+ * Dopaminote 앱의 타입 정의 (목업 버전)
  */
 
 // 상황 카테고리 타입
@@ -18,45 +18,41 @@ export type Mood =
   | 'neutral'      // 무감정
   | 'bad';         // 나쁨
 
-// 도파민 기록 타입
-export interface DopamineRecord {
+// 목업용 도파민 기록 타입
+export interface MockDopamineRecord {
   id: string;
-  user_id: string;
-  image_url: string;
+  image_url?: string;
   situation: Situation;
   mood: Mood;
-  note: string;
+  note?: string;
   created_at: string;
-  updated_at: string;
 }
 
-// 회고 노트 타입
-export interface JournalEntry {
+// 목업용 회고 노트 타입
+export interface MockJournalEntry {
   id: string;
-  user_id: string;
   date: string;
-  reflection: string;
-  goals: string;
+  reflection?: string;
+  goals?: string;
   created_at: string;
-  updated_at: string;
 }
 
-// 분석 결과 타입
-export interface AnalysisResult {
+// 목업용 분석 결과 타입
+export interface MockAnalysisResult {
   totalRecords: number;
-  situationBreakdown: Record<Situation, number>;
-  moodBreakdown: Record<Mood, number>;
+  situationBreakdown: Record<string, number>;
+  moodBreakdown: Record<string, number>;
   averageMood: number;
-  mostCommonSituation: Situation;
+  mostCommonSituation: string;
   feedback: string[];
 }
 
-// 업로드 폼 데이터 타입
-export interface UploadFormData {
-  image: File | null;
+// 목업용 업로드 폼 데이터 타입
+export interface MockUploadFormData {
+  image?: File;
   situation: Situation;
   mood: Mood;
-  note: string;
+  note?: string;
 }
 
 // 차트 데이터 타입

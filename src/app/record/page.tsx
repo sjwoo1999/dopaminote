@@ -4,8 +4,7 @@
  */
 
 import Link from 'next/link';
-import { ArrowLeft, Plus } from 'lucide-react';
-import UploadForm from '@/components/UploadForm';
+import { ArrowLeft, Plus, Upload, CheckCircle } from 'lucide-react';
 
 export default function RecordPage() {
   return (
@@ -59,13 +58,84 @@ export default function RecordPage() {
           </p>
         </div>
 
-        {/* 업로드 폼 */}
-        <UploadForm 
-          onSuccess={() => {
-            // 성공 시 분석 페이지로 이동하거나 다른 액션 수행
-            console.log('기록이 성공적으로 저장되었습니다!');
-          }}
-        />
+        {/* 목업 업로드 폼 */}
+        <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
+          <h2 className="text-2xl font-bold text-gray-800 mb-6">도파민 기록 추가</h2>
+          
+          <div className="space-y-6">
+            {/* 이미지 업로드 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                스크린샷 업로드
+              </label>
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                <p className="text-sm text-gray-600">클릭하여 이미지 선택</p>
+                <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF (최대 5MB)</p>
+              </div>
+            </div>
+
+            {/* 상황 선택 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                어떤 상황이었나요?
+              </label>
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">상황을 선택하세요</option>
+                <option value="boredom">심심함</option>
+                <option value="stress">스트레스</option>
+                <option value="habit">습관</option>
+                <option value="social">소셜미디어</option>
+                <option value="work">업무</option>
+                <option value="entertainment">엔터테인먼트</option>
+                <option value="other">기타</option>
+              </select>
+            </div>
+
+            {/* 기분 선택 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                기분은 어땠나요?
+              </label>
+              <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                <option value="">기분을 선택하세요</option>
+                <option value="good">좋음</option>
+                <option value="neutral">무감정</option>
+                <option value="bad">나쁨</option>
+              </select>
+            </div>
+
+            {/* 첨언 */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                추가 메모 (선택사항)
+              </label>
+              <textarea
+                rows={3}
+                placeholder="이 상황에 대한 생각이나 느낌을 자유롭게 적어보세요..."
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+              />
+            </div>
+
+            {/* 성공 메시지 (목업) */}
+            <div className="p-3 bg-green-50 border border-green-200 rounded-md">
+              <div className="flex items-center space-x-2">
+                <CheckCircle className="h-4 w-4 text-green-600" />
+                <p className="text-sm text-green-600">기록이 성공적으로 저장되었습니다!</p>
+              </div>
+            </div>
+
+            {/* 버튼 그룹 */}
+            <div className="flex gap-3">
+              <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+                기록 저장
+              </button>
+              <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+                초기화
+              </button>
+            </div>
+          </div>
+        </div>
 
         {/* 추가 안내 */}
         <div className="mt-12 max-w-4xl mx-auto">

@@ -2,6 +2,21 @@
 
 도파민 소비 패턴을 분석하고 개선하는 웹 애플리케이션입니다.
 
+## 🚀 현재 상태
+
+### ✅ 구현 완료
+- **목업 UI**: 모든 페이지의 기본 UI 구현 완료
+- **반응형 디자인**: 모바일/데스크톱 호환
+- **네비게이션**: 페이지 간 이동
+- **기본 컴포넌트**: 업로드 폼, 차트, 회고 에디터
+
+### 🔄 다음 단계 (실제 기능 구현)
+- [ ] Supabase 데이터베이스 연결
+- [ ] 사용자 인증 시스템
+- [ ] 실제 이미지 업로드 및 저장
+- [ ] 데이터 기반 분석 기능
+- [ ] 회고 저장 및 조회
+
 ## 📋 프로젝트 개요
 
 Dopaminote는 사용자가 스크린샷을 업로드하고 상황/감정/첨언을 기록하여, 도파민 소비 패턴을 분석하고 회고하는 웹 앱입니다.
@@ -49,20 +64,42 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 
 ### 4. Supabase 설정
 
-1. [Supabase](https://supabase.com)에서 새 프로젝트를 생성하세요.
-2. SQL Editor에서 다음 테이블을 생성하세요:
+## 📋 Supabase 설정 가이드
+
+### 1. Supabase 계정 생성
+1. [supabase.com](https://supabase.com) 방문
+2. "Start your project" 클릭
+3. GitHub 계정으로 로그인
+4. 새 프로젝트 생성
+
+### 2. 프로젝트 설정
+- 프로젝트 이름: `dopaminote`
+- 데이터베이스 비밀번호 설정 (기억해두세요!)
+- 지역 선택 (가까운 곳 선택)
+
+### 3. 환경 변수 설정
+프로젝트 생성 후 다음 정보를 받게 됩니다:
+
+```bash
+# .env.local 파일 생성
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
+
+### 4. 데이터베이스 스키마 설정
+Supabase 대시보드에서 다음 SQL을 실행:
 
 ```sql
 -- 도파민 기록 테이블
 CREATE TABLE dopamine_records (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   user_id UUID REFERENCES auth.users(id),
-  image_url TEXT NOT NULL,
-  situation TEXT NOT NULL CHECK (situation IN ('boredom', 'stress', 'habit', 'social', 'work', 'entertainment', 'other')),
-  mood TEXT NOT NULL CHECK (mood IN ('good', 'neutral', 'bad')),
-  note TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  image_url TEXT,
+  situation TEXT NOT NULL,
+  mood TEXT NOT NULL,
+  notes TEXT,
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- 회고 노트 테이블
@@ -72,32 +109,64 @@ CREATE TABLE journal_entries (
   date DATE NOT NULL,
   reflection TEXT,
   goals TEXT,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
 -- RLS (Row Level Security) 설정
 ALTER TABLE dopamine_records ENABLE ROW LEVEL SECURITY;
 ALTER TABLE journal_entries ENABLE ROW LEVEL SECURITY;
 
--- 정책 설정 (개발용 - 모든 사용자가 모든 데이터에 접근 가능)
-CREATE POLICY "Allow all access" ON dopamine_records FOR ALL USING (true);
-CREATE POLICY "Allow all access" ON journal_entries FOR ALL USING (true);
+-- 사용자별 데이터 접근 정책
+CREATE POLICY "Users can view own records" ON dopamine_records
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own records" ON dopamine_records
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can view own journal entries" ON journal_entries
+  FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own journal entries" ON journal_entries
+  FOR INSERT WITH CHECK (auth.uid() = user_id);
 ```
 
-3. Storage 버킷 생성:
-   - Storage > New Bucket
-   - Bucket name: `screenshots`
-   - Public bucket: ✅ 체크
-   - File size limit: 5MB
+### 5. 스토리지 버킷 설정
+1. Storage 메뉴에서 새 버킷 생성: `dopamine-images`
+2. 버킷 설정에서 RLS 활성화
+3. 정책 설정:
+```sql
+CREATE POLICY "Users can upload own images" ON storage.objects
+  FOR INSERT WITH CHECK (bucket_id = 'dopamine-images' AND auth.uid()::text = (storage.foldername(name))[1]);
 
-### 5. 개발 서버 실행
+CREATE POLICY "Users can view own images" ON storage.objects
+  FOR SELECT USING (bucket_id = 'dopamine-images' AND auth.uid()::text = (storage.foldername(name))[1]);
+```
 
+## 🛠️ 개발 환경 설정
+
+### 필수 요구사항
+- Node.js 18+ 
+- npm 또는 yarn
+
+### 설치 및 실행
 ```bash
+# 의존성 설치
+npm install
+
+# 개발 서버 실행 (포트 3001)
 npm run dev
 ```
 
-브라우저에서 [http://localhost:3000](http://localhost:3000)을 열어 애플리케이션을 확인하세요.
+### 환경 변수 설정
+```bash
+# .env.local 파일 생성
+cp .env.example .env.local
+
+# Supabase 정보 입력
+NEXT_PUBLIC_SUPABASE_URL=your_project_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+```
 
 ## 📁 프로젝트 구조
 
