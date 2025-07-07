@@ -61,6 +61,9 @@ export default function JournalPage() {
               <Link href="/report" className="text-gray-600 hover:text-blue-600 transition-colors">
                 분석보기
               </Link>
+              <Link href="/wellness" className="text-gray-600 hover:text-blue-600 transition-colors">
+                웰빙
+              </Link>
               <Link href="/journal" className="text-blue-600 font-medium">
                 회고노트
               </Link>

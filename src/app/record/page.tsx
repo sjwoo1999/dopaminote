@@ -4,9 +4,48 @@
  */
 
 import Link from 'next/link';
-import { ArrowLeft, Plus, Upload, CheckCircle } from 'lucide-react';
+import { ArrowLeft, Plus, Upload, CheckCircle, Clock, Repeat, AlertTriangle } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/Button';
+import { calculateDopamineScore } from '@/lib/utils';
 
 export default function RecordPage() {
+  const [formData, setFormData] = useState({
+    situation: '',
+    mood: '',
+    notes: '',
+    usage_time: 0,
+    pattern_repetition: 0,
+    situation_stress: 1
+  });
+
+  const [dopamineScore, setDopamineScore] = useState(0);
+
+  const handleInputChange = (field: string, value: string | number) => {
+    const newFormData = { ...formData, [field]: value };
+    setFormData(newFormData);
+    
+    // 도파민 스코어 실시간 계산
+    const score = calculateDopamineScore(
+      newFormData.usage_time,
+      newFormData.pattern_repetition,
+      newFormData.situation_stress
+    );
+    setDopamineScore(score);
+  };
+
+  const getScoreColor = (score: number) => {
+    if (score < 30) return 'text-green-600 bg-green-50';
+    if (score < 60) return 'text-yellow-600 bg-yellow-50';
+    return 'text-red-600 bg-red-50';
+  };
+
+  const getScoreLevel = (score: number) => {
+    if (score < 30) return '건강';
+    if (score < 60) return '주의';
+    return '위험';
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* 헤더 */}
@@ -36,6 +75,9 @@ export default function RecordPage() {
               <Link href="/report" className="text-gray-600 hover:text-blue-600 transition-colors">
                 분석보기
               </Link>
+              <Link href="/wellness" className="text-gray-600 hover:text-blue-600 transition-colors">
+                웰빙
+              </Link>
               <Link href="/journal" className="text-gray-600 hover:text-blue-600 transition-colors">
                 회고노트
               </Link>
@@ -58,7 +100,33 @@ export default function RecordPage() {
           </p>
         </div>
 
-        {/* 목업 업로드 폼 */}
+        {/* 실시간 도파민 스코어 표시 */}
+        <div className="max-w-2xl mx-auto mb-6">
+          <div className={`p-4 rounded-lg border ${getScoreColor(dopamineScore)}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <AlertTriangle className="h-5 w-5" />
+                <span className="font-medium">실시간 도파민 스코어</span>
+              </div>
+              <div className="text-right">
+                <div className="text-2xl font-bold">{dopamineScore}</div>
+                <div className="text-sm">{getScoreLevel(dopamineScore)}</div>
+              </div>
+            </div>
+            <div className="mt-2">
+              <div className="w-full bg-gray-200 rounded-full h-2">
+                <div 
+                  className={`h-2 rounded-full transition-all duration-300 ${
+                    dopamineScore < 30 ? 'bg-green-500' : dopamineScore < 60 ? 'bg-yellow-500' : 'bg-red-500'
+                  }`}
+                  style={{ width: `${dopamineScore}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 업로드 폼 */}
         <div className="max-w-2xl mx-auto p-6 bg-white rounded-lg shadow-lg">
           <h2 className="text-2xl font-bold text-gray-800 mb-6">도파민 기록 추가</h2>
           
@@ -80,7 +148,11 @@ export default function RecordPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 어떤 상황이었나요?
               </label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <select 
+                value={formData.situation}
+                onChange={(e) => handleInputChange('situation', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
                 <option value="">상황을 선택하세요</option>
                 <option value="boredom">심심함</option>
                 <option value="stress">스트레스</option>
@@ -97,12 +169,70 @@ export default function RecordPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 기분은 어땠나요?
               </label>
-              <select className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+              <select 
+                value={formData.mood}
+                onChange={(e) => handleInputChange('mood', e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
                 <option value="">기분을 선택하세요</option>
                 <option value="good">좋음</option>
                 <option value="neutral">무감정</option>
                 <option value="bad">나쁨</option>
               </select>
+            </div>
+
+            {/* 새로운 웰빙 필드들 */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* 사용 시간 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Clock className="h-4 w-4 inline mr-1" />
+                  사용 시간 (분)
+                </label>
+                <input
+                  type="number"
+                  value={formData.usage_time}
+                  onChange={(e) => handleInputChange('usage_time', Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0"
+                  min="0"
+                />
+              </div>
+
+              {/* 반복 패턴 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <Repeat className="h-4 w-4 inline mr-1" />
+                  반복 횟수
+                </label>
+                <input
+                  type="number"
+                  value={formData.pattern_repetition}
+                  onChange={(e) => handleInputChange('pattern_repetition', Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  placeholder="0"
+                  min="0"
+                />
+              </div>
+
+              {/* 스트레스 수준 */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <AlertTriangle className="h-4 w-4 inline mr-1" />
+                  스트레스 수준 (1-5)
+                </label>
+                <select
+                  value={formData.situation_stress}
+                  onChange={(e) => handleInputChange('situation_stress', Number(e.target.value))}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                >
+                  <option value={1}>1 - 매우 낮음</option>
+                  <option value={2}>2 - 낮음</option>
+                  <option value={3}>3 - 보통</option>
+                  <option value={4}>4 - 높음</option>
+                  <option value={5}>5 - 매우 높음</option>
+                </select>
+              </div>
             </div>
 
             {/* 첨언 */}
@@ -111,6 +241,8 @@ export default function RecordPage() {
                 추가 메모 (선택사항)
               </label>
               <textarea
+                value={formData.notes}
+                onChange={(e) => handleInputChange('notes', e.target.value)}
                 rows={3}
                 placeholder="이 상황에 대한 생각이나 느낌을 자유롭게 적어보세요..."
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
@@ -127,12 +259,12 @@ export default function RecordPage() {
 
             {/* 버튼 그룹 */}
             <div className="flex gap-3">
-              <button className="flex-1 bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
+              <Button variant="primary" className="flex-1">
                 기록 저장
-              </button>
-              <button className="px-4 py-2 border border-gray-300 text-gray-700 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors">
+              </Button>
+              <Button variant="outline">
                 초기화
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -171,14 +303,22 @@ export default function RecordPage() {
         {/* 다음 단계 안내 */}
         <div className="mt-8 text-center">
           <p className="text-gray-600 mb-4">
-            기록을 완료하셨나요? 분석 결과를 확인해보세요!
+            기록을 완료하셨나요? 웰빙 대시보드에서 종합적인 분석을 확인해보세요!
           </p>
-          <Link
-            href="/report"
-            className="inline-flex items-center justify-center px-6 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-          >
-            분석 결과 보기
-          </Link>
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            <Link
+              href="/wellness"
+              className="inline-flex items-center justify-center px-6 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 transition-colors"
+            >
+              웰빙 대시보드 보기
+            </Link>
+            <Link
+              href="/report"
+              className="inline-flex items-center justify-center px-6 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            >
+              상세 분석 보기
+            </Link>
+          </div>
         </div>
       </main>
     </div>
