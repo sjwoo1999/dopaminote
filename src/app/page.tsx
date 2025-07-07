@@ -4,7 +4,7 @@
  */
 
 import Link from 'next/link';
-import { Brain, BarChart3, BookOpen, Plus, TrendingUp, Target, Zap } from 'lucide-react';
+import { Brain, BarChart3, BookOpen, Plus, TrendingUp, Target, Zap, Heart } from 'lucide-react';
 
 export default function Home() {
   const features = [
@@ -21,6 +21,13 @@ export default function Home() {
       description: '기록된 데이터를 분석하여 도파민 소비 패턴을 시각화하고 인사이트를 얻으세요.',
       href: '/report',
       color: 'bg-green-50 border-green-200',
+    },
+    {
+      icon: <Heart className="h-8 w-8 text-pink-600" />,
+      title: '웰빙 대시보드',
+      description: '도파민 스코어, Word to Self 계약, 리셋 루틴으로 종합적인 디지털 웰빙을 관리하세요.',
+      href: '/wellness',
+      color: 'bg-pink-50 border-pink-200',
     },
     {
       icon: <BookOpen className="h-8 w-8 text-purple-600" />,
@@ -72,6 +79,9 @@ export default function Home() {
               </Link>
               <Link href="/report" className="text-gray-600 hover:text-blue-600 transition-colors">
                 분석보기
+              </Link>
+              <Link href="/wellness" className="text-gray-600 hover:text-blue-600 transition-colors">
+                웰빙
               </Link>
               <Link href="/journal" className="text-gray-600 hover:text-blue-600 transition-colors">
                 회고노트
