@@ -22,6 +22,28 @@ export default function RecordPage() {
   });
 
   const [dopamineScore, setDopamineScore] = useState(0);
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [uploadStatus, setUploadStatus] = useState<'idle' | 'uploading' | 'success' | 'error'>('idle');
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // 파일 크기 체크 (5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('파일 크기는 5MB 이하여야 합니다.');
+        return;
+      }
+      
+      // 파일 타입 체크
+      if (!file.type.startsWith('image/')) {
+        alert('이미지 파일만 업로드 가능합니다.');
+        return;
+      }
+      
+      setSelectedFile(file);
+      setUploadStatus('idle');
+    }
+  };
 
   const handleInputChange = (field: string, value: string | number) => {
     const newFormData = { ...formData, [field]: value };
@@ -46,6 +68,67 @@ export default function RecordPage() {
     if (score < 30) return '건강';
     if (score < 60) return '주의';
     return '위험';
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!selectedFile) {
+      alert('이미지를 업로드해주세요.');
+      return;
+    }
+    
+    if (!formData.situation || !formData.mood) {
+      alert('상황과 기분을 선택해주세요.');
+      return;
+    }
+    
+    setUploadStatus('uploading');
+    
+    try {
+      // 실제 구현에서는 여기에 API 호출이 들어갑니다
+      // const formDataToSend = new FormData();
+      // formDataToSend.append('image', selectedFile);
+      // formDataToSend.append('data', JSON.stringify(formData));
+      
+      // 목업: 2초 후 성공으로 처리
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      setUploadStatus('success');
+      
+      // 성공 후 폼 초기화
+      setTimeout(() => {
+        setFormData({
+          situation: '',
+          mood: '',
+          notes: '',
+          usage_time: 0,
+          pattern_repetition: 0,
+          situation_stress: 1
+        });
+        setSelectedFile(null);
+        setDopamineScore(0);
+        setUploadStatus('idle');
+      }, 3000);
+      
+    } catch (error) {
+      setUploadStatus('error');
+      console.error('업로드 실패:', error);
+    }
+  };
+
+  const handleReset = () => {
+    setFormData({
+      situation: '',
+      mood: '',
+      notes: '',
+      usage_time: 0,
+      pattern_repetition: 0,
+      situation_stress: 1
+    });
+    setSelectedFile(null);
+    setDopamineScore(0);
+    setUploadStatus('idle');
   };
 
   return (
@@ -138,11 +221,56 @@ export default function RecordPage() {
               <label className="block text-sm font-medium text-gray-700 mb-2">
                 스크린샷 업로드
               </label>
-              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
-                <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
-                <p className="text-sm text-gray-600">클릭하여 이미지 선택</p>
-                <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF (최대 5MB)</p>
+              <div className="relative">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileSelect}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  id="file-upload"
+                />
+                <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                  {selectedFile ? (
+                    <div className="space-y-2">
+                      <div className="w-16 h-16 mx-auto bg-gray-100 rounded-lg flex items-center justify-center">
+                        <img 
+                          src={URL.createObjectURL(selectedFile)} 
+                          alt="Preview" 
+                          className="w-12 h-12 object-cover rounded"
+                        />
+                      </div>
+                      <p className="text-sm text-gray-600">{selectedFile.name}</p>
+                      <p className="text-xs text-gray-500">
+                        {(selectedFile.size / 1024 / 1024).toFixed(2)} MB
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
+                      <p className="text-sm text-gray-600">클릭하여 이미지 선택</p>
+                      <p className="text-xs text-gray-500 mt-1">PNG, JPG, GIF (최대 5MB)</p>
+                    </>
+                  )}
+                </div>
               </div>
+              {uploadStatus === 'uploading' && (
+                <div className="mt-2 p-2 bg-blue-50 border border-blue-200 rounded-md">
+                  <p className="text-sm text-blue-600">업로드 중...</p>
+                </div>
+              )}
+              {uploadStatus === 'success' && (
+                <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded-md">
+                  <div className="flex items-center space-x-2">
+                    <CheckCircle className="h-4 w-4 text-green-600" />
+                    <p className="text-sm text-green-600">이미지 업로드 완료!</p>
+                  </div>
+                </div>
+              )}
+              {uploadStatus === 'error' && (
+                <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded-md">
+                  <p className="text-sm text-red-600">업로드 실패. 다시 시도해주세요.</p>
+                </div>
+              )}
             </div>
 
             {/* 상황 선택 */}
@@ -251,20 +379,21 @@ export default function RecordPage() {
               />
             </div>
 
-            {/* 성공 메시지 (목업) */}
-            <div className="p-3 bg-green-50 border border-green-200 rounded-md">
-              <div className="flex items-center space-x-2">
-                <CheckCircle className="h-4 w-4 text-green-600" />
-                <p className="text-sm text-green-600">기록이 성공적으로 저장되었습니다!</p>
-              </div>
-            </div>
-
             {/* 버튼 그룹 */}
             <div className="flex gap-3">
-              <Button variant="primary" className="flex-1">
-                기록 저장
+              <Button 
+                variant="primary" 
+                className="flex-1"
+                onClick={handleSubmit}
+                disabled={uploadStatus === 'uploading'}
+              >
+                {uploadStatus === 'uploading' ? '저장 중...' : '기록 저장'}
               </Button>
-              <Button variant="outline">
+              <Button 
+                variant="outline"
+                onClick={handleReset}
+                disabled={uploadStatus === 'uploading'}
+              >
                 초기화
               </Button>
             </div>
