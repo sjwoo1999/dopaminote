@@ -10,6 +10,7 @@ import { ArrowLeft, Plus, Target, TrendingUp, Users, Heart } from 'lucide-react'
 import { DopamineScoreCard } from '@/components/wellness/DopamineScoreCard';
 import { WordToSelfContractForm, WordToSelfContractStatus } from '@/components/wellness/WordToSelfContract';
 import { ResetRoutineList } from '@/components/wellness/ResetRoutine';
+import { AccessibleButton } from '@/components/ui/AccessibleButton';
 import { generateMockData } from '@/lib/analysis';
 import { WordToSelfContract, ResetRoutine } from '@/types';
 
@@ -98,10 +99,15 @@ export default function WellnessPage() {
           <div>
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-xl font-semibold text-gray-800">Word to Self 계약</h3>
-              <button className="text-blue-600 hover:text-blue-700 text-sm font-medium">
+              <AccessibleButton 
+                variant="ghost"
+                size="sm"
+                className="text-blue-600 hover:text-blue-700 text-sm font-medium"
+                ariaLabel="새로운 Word to Self 계약 만들기"
+              >
                 <Plus className="h-4 w-4 inline mr-1" />
                 새 계약
-              </button>
+              </AccessibleButton>
             </div>
             
             {contracts.length > 0 ? (
@@ -117,9 +123,12 @@ export default function WellnessPage() {
                 <p className="text-gray-600 mb-4">
                   자신과의 약속을 통해 디지털 웰빙 목표를 설정하고 추적해보세요.
                 </p>
-                <button className="bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 transition-colors">
+                <AccessibleButton 
+                  variant="primary"
+                  ariaLabel="첫 번째 Word to Self 계약 만들기"
+                >
                   계약 만들기
-                </button>
+                </AccessibleButton>
               </div>
             )}
           </div>

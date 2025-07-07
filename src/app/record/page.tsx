@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { ArrowLeft, Plus, Upload, CheckCircle, Clock, Repeat, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { AccessibleButton } from '@/components/ui/AccessibleButton';
+import { TouchFriendlyInput, TouchFriendlySelect } from '@/components/ui/TouchFriendlyInput';
 import { calculateDopamineScore } from '@/lib/utils';
 
 export default function RecordPage() {
@@ -274,100 +276,84 @@ export default function RecordPage() {
             </div>
 
             {/* 상황 선택 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                어떤 상황이었나요?
-              </label>
-              <select 
-                value={formData.situation}
-                onChange={(e) => handleInputChange('situation', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">상황을 선택하세요</option>
-                <option value="boredom">심심함</option>
-                <option value="stress">스트레스</option>
-                <option value="habit">습관</option>
-                <option value="social">소셜미디어</option>
-                <option value="work">업무</option>
-                <option value="entertainment">엔터테인먼트</option>
-                <option value="other">기타</option>
-              </select>
-            </div>
+            <TouchFriendlySelect
+              label="어떤 상황이었나요?"
+              value={formData.situation}
+              onChange={(e) => handleInputChange('situation', e.target.value)}
+              options={[
+                { value: "", label: "상황을 선택하세요" },
+                { value: "boredom", label: "심심함" },
+                { value: "stress", label: "스트레스" },
+                { value: "habit", label: "습관" },
+                { value: "social", label: "소셜미디어" },
+                { value: "work", label: "업무" },
+                { value: "entertainment", label: "엔터테인먼트" },
+                { value: "other", label: "기타" }
+              ]}
+              helperText="도파민을 소비하게 된 상황을 선택해주세요"
+            />
 
             {/* 기분 선택 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                기분은 어땠나요?
-              </label>
-              <select 
-                value={formData.mood}
-                onChange={(e) => handleInputChange('mood', e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-              >
-                <option value="">기분을 선택하세요</option>
-                <option value="good">좋음</option>
-                <option value="neutral">무감정</option>
-                <option value="bad">나쁨</option>
-              </select>
-            </div>
+            <TouchFriendlySelect
+              label="기분은 어땠나요?"
+              value={formData.mood}
+              onChange={(e) => handleInputChange('mood', e.target.value)}
+              options={[
+                { value: "", label: "기분을 선택하세요" },
+                { value: "good", label: "좋음" },
+                { value: "neutral", label: "무감정" },
+                { value: "bad", label: "나쁨" }
+              ]}
+              helperText="도파민 소비 후의 기분을 선택해주세요"
+            />
 
             {/* 새로운 웰빙 필드들 */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* 사용 시간 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Clock className="h-4 w-4 inline mr-1" />
-                  사용 시간 (분)
-                </label>
-                <input
-                  type="number"
-                  value={formData.usage_time}
-                  onChange={(e) => handleInputChange('usage_time', Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0"
-                  min="0"
-                />
-              </div>
+              <TouchFriendlyInput
+                label="사용 시간 (분)"
+                type="number"
+                value={formData.usage_time}
+                onChange={(e) => handleInputChange('usage_time', Number(e.target.value))}
+                placeholder="0"
+                min="0"
+                icon={<Clock className="h-4 w-4" />}
+                helperText="도파민을 소비한 총 시간을 입력하세요"
+                variant="default"
+              />
 
               {/* 반복 패턴 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Repeat className="h-4 w-4 inline mr-1" />
-                  반복 횟수
-                </label>
-                <input
-                  type="number"
-                  value={formData.pattern_repetition}
-                  onChange={(e) => handleInputChange('pattern_repetition', Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                  placeholder="0"
-                  min="0"
-                />
-              </div>
+              <TouchFriendlyInput
+                label="반복 횟수"
+                type="number"
+                value={formData.pattern_repetition}
+                onChange={(e) => handleInputChange('pattern_repetition', Number(e.target.value))}
+                placeholder="0"
+                min="0"
+                icon={<Repeat className="h-4 w-4" />}
+                helperText="같은 행동을 반복한 횟수를 입력하세요"
+                variant="default"
+              />
 
               {/* 스트레스 수준 */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <AlertTriangle className="h-4 w-4 inline mr-1" />
-                  스트레스 수준 (1-5)
-                </label>
-                <select
-                  value={formData.situation_stress}
-                  onChange={(e) => handleInputChange('situation_stress', Number(e.target.value))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  <option value={1}>1 - 매우 낮음</option>
-                  <option value={2}>2 - 낮음</option>
-                  <option value={3}>3 - 보통</option>
-                  <option value={4}>4 - 높음</option>
-                  <option value={5}>5 - 매우 높음</option>
-                </select>
-              </div>
+              <TouchFriendlySelect
+                label="스트레스 수준"
+                value={formData.situation_stress}
+                onChange={(e) => handleInputChange('situation_stress', Number(e.target.value))}
+                options={[
+                  { value: "1", label: "1 - 매우 낮음" },
+                  { value: "2", label: "2 - 낮음" },
+                  { value: "3", label: "3 - 보통" },
+                  { value: "4", label: "4 - 높음" },
+                  { value: "5", label: "5 - 매우 높음" }
+                ]}
+                helperText="도파민 소비 시의 스트레스 수준을 선택하세요"
+              />
             </div>
 
             {/* 첨언 */}
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
                 추가 메모 (선택사항)
               </label>
               <textarea
@@ -375,27 +361,40 @@ export default function RecordPage() {
                 onChange={(e) => handleInputChange('notes', e.target.value)}
                 rows={3}
                 placeholder="이 상황에 대한 생각이나 느낌을 자유롭게 적어보세요..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none touch-manipulation"
               />
+              <p className="text-sm text-gray-500">
+                도파민 소비에 대한 추가적인 생각이나 느낌을 자유롭게 적어보세요
+              </p>
             </div>
 
             {/* 버튼 그룹 */}
             <div className="flex gap-3">
-              <Button 
+              <AccessibleButton 
                 variant="primary" 
                 className="flex-1"
                 onClick={handleSubmit}
                 disabled={uploadStatus === 'uploading'}
+                ariaLabel="도파민 기록 저장"
+                ariaDescribedBy="save-description"
               >
                 {uploadStatus === 'uploading' ? '저장 중...' : '기록 저장'}
-              </Button>
-              <Button 
+              </AccessibleButton>
+              <AccessibleButton 
                 variant="outline"
                 onClick={handleReset}
                 disabled={uploadStatus === 'uploading'}
+                ariaLabel="폼 초기화"
+                ariaDescribedBy="reset-description"
               >
                 초기화
-              </Button>
+              </AccessibleButton>
+            </div>
+            
+            {/* 접근성 설명 */}
+            <div className="sr-only">
+              <div id="save-description">도파민 소비 기록을 저장합니다</div>
+              <div id="reset-description">모든 입력 필드를 초기화합니다</div>
             </div>
           </div>
         </div>

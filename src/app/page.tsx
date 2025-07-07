@@ -1,12 +1,33 @@
+"use client";
+
 /**
  * Dopaminote 홈 페이지
  * 앱의 주요 기능들을 소개하고 사용자를 안내합니다.
  */
 
 import Link from 'next/link';
-import { Brain, BarChart3, BookOpen, Plus, TrendingUp, Target, Zap, Heart } from 'lucide-react';
+import { Brain, BarChart3, BookOpen, Plus, TrendingUp, Target, Zap, Heart, HelpCircle } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { OnboardingModal } from '@/components/ui/OnboardingModal';
 
 export default function Home() {
+  const [showOnboarding, setShowOnboarding] = useState(false);
+  const [hasSeenOnboarding, setHasSeenOnboarding] = useState(false);
+
+  // 첫 방문자 체크
+  useEffect(() => {
+    const hasSeen = localStorage.getItem('dopaminote-onboarding-seen');
+    if (!hasSeen) {
+      setShowOnboarding(true);
+    }
+  }, []);
+
+  const handleOnboardingComplete = () => {
+    setShowOnboarding(false);
+    setHasSeenOnboarding(true);
+    localStorage.setItem('dopaminote-onboarding-seen', 'true');
+  };
+
   const features = [
     {
       icon: <Plus className="h-8 w-8 text-blue-600" />,
@@ -86,6 +107,14 @@ export default function Home() {
               <Link href="/journal" className="text-gray-600 hover:text-blue-600 transition-colors">
                 회고노트
               </Link>
+              <button
+                onClick={() => setShowOnboarding(true)}
+                className="text-gray-600 hover:text-blue-600 transition-colors flex items-center space-x-1"
+                aria-label="사용법 안내"
+              >
+                <HelpCircle className="h-4 w-4" />
+                <span>도움말</span>
+              </button>
             </nav>
           </div>
         </div>
@@ -206,6 +235,13 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+      {/* 온보딩 모달 */}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onClose={() => setShowOnboarding(false)}
+        onComplete={handleOnboardingComplete}
+      />
     </div>
   );
 }
